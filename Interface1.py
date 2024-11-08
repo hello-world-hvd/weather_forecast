@@ -13,6 +13,7 @@ import pytz
 from PIL import Image, ImageTk
 from app import get_current_time
 import customtkinter
+from api_getdata import get_aqi
 
 class WeatherDetail:
     def __init__(self, root, data, city, time_update_id, location):
@@ -173,9 +174,90 @@ class WeatherDetail:
         )
         city_label.pack(side=LEFT)
 
+        ## Weather summary frame
+        summary_frame = Frame(location_temp_frame, bg="#282829", padx=10, pady=5, highlightbackground="white", highlightthickness=1)
+        summary_frame.pack(side=LEFT, padx=10, fill=X, expand=True)
+
+        # Current weather description
+        weather_desc = self.data['current']['weather'][0]['description']
+        weather_main = self.data['current']['weather'][0]['main']
+        daily_summary = self.data['daily'][0]['summary']
+
+        desc_frame = Frame(summary_frame, bg="#282829")
+        # desc_frame.pack(fill=X)
+        desc_frame.pack()
+
+        summary_label = Label(
+            desc_frame,
+            text=weather_main,
+            font=("Helvetica", 18, "bold"),
+            fg="white",
+            bg="#282829"
+        )
+        summary_label.pack(side=LEFT)
+
+        description_label = Label(
+            desc_frame,
+            text=f"({weather_desc.capitalize()})",
+            font=("Helvetica", 12),
+            fg="#57adff",
+            bg="#282829"
+        )
+        description_label.pack(side=LEFT, padx=(10,0), pady=(4,0))
+
+        # Daily Summary Frame
+        daily_summary_frame = Frame(summary_frame, bg="#282829")
+        daily_summary_frame.pack(fill=X, pady=(5,0))
+
+        daily_summary_label = Label(
+            daily_summary_frame,
+            text=daily_summary,
+            font=("Helvetica", 11),
+            fg="#e0e0e0",
+            bg="#282829",
+            wraplength=400,  
+            justify=LEFT
+        )
+        # daily_summary_label.pack(side=LEFT)
+        daily_summary_label.pack()
+        
+        # aqi frame
+        aqi_frame = Frame(summary_frame, bg="#282829")
+        # aqi_frame.pack(fill=X, pady=(5,0))
+        aqi_frame.pack()
+        
+        aqi_value, aqi_status = get_aqi(self.location)
+        
+        aqi_label = Label(
+            aqi_frame,
+            text="Air Quality Index:",
+            font=("Helvetica", 12),
+            fg="white",
+            bg="#282829"
+        ) 
+        aqi_label.pack(side=LEFT)
+
+        aqi_value = Label(
+            aqi_frame,
+            text=aqi_value,
+            font=("Helvetica", 14, "bold"),
+            fg=aqi_status[1],
+            bg="#282829"
+        )
+        aqi_value.pack(side=LEFT, padx=(5,5))
+
+        aqi_status = Label(
+            aqi_frame,
+            text=aqi_status[0],
+            font=("Helvetica", 10),
+            fg=aqi_status[1],
+            bg="#282829"
+        )
+        aqi_status.pack(side=LEFT)
+
         # Temperature display
-        temp_frame = Frame(location_temp_frame, bg="#282829", padx=20, highlightbackground="white", highlightthickness=2, pady=10)
-        temp_frame.pack(side=RIGHT, padx=(0, 30), pady=15)
+        temp_frame = Frame(location_temp_frame, bg="#282829", padx=20, highlightbackground="white", highlightthickness=1, pady=10)
+        temp_frame.pack(side=RIGHT, padx=(10, 30), pady=15)
 
         temp_icon_frame = Frame(temp_frame, bg="#282829")
         temp_icon_frame.pack()

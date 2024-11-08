@@ -1,4 +1,3 @@
-import json
 from tkinter import*
 import tkinter as tk
 from geopy.geocoders import Nominatim
@@ -6,11 +5,9 @@ from tkinter import ttk,messagebox
 from numpy import resize
 from timezonefinder import TimezoneFinder
 from datetime import*
-import requests
 import pytz
 from PIL import Image, ImageTk
-from app import load_location, get_current_time
-import os
+from api_getdata import get_json_data, load_location
 
 class WeatherApp:
     def __init__(self, root=None, data=None, time_update_id=None, city=None, location = None):
@@ -48,21 +45,6 @@ class WeatherApp:
         # Import here to avoid circular import
         from Interface1 import WeatherDetail
         WeatherDetail(self.root, self.data, self.city, self.time_update_id, self.location)
-
-    def save_location(city, loc):
-        if(os.path.exists('locations_data.json')):
-            with open('location_data.json', 'r') as f:
-                locations = json.load(f)
-        else:
-            locations = {}
-
-        locations[city] = {
-            'latitude': loc.latitude,
-            'longitude': loc.longitude
-        }
-
-        with open('location_data.json', 'w') as f:
-            json.dump(locations, f)
 
     def getTime(self, location):
         global time_update_id, clock
@@ -213,12 +195,7 @@ class WeatherApp:
     def getData(self):
         self.city = self.textfield.get()
         self.location = load_location(self.city)
-
-        #weather
-        api="https://api.openweathermap.org/data/2.8/onecall?lat="+str(self.location.latitude)+"&lon="+str(self.location.longitude)+"&units=metric&exclude=hourly&appid=a40a08819e2ca4455e9badc3a50026b6"
-        json_data=requests.get(api).json()
-
-        self.data=json_data
+        self.data=get_json_data(self.location)
         self.getTime(self.location)
         self.getWeather(self.data)
 
