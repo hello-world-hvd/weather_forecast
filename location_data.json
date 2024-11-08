@@ -1,0 +1,6 @@
+{
+    "hanoi": {"latitude": 21.0283334, "longitude": 105.854041},
+    "delhi": {"latitude": 28.6273928, "longitude": 77.1716954},
+    "london": {"latitude": 51.5074456, "longitude": -0.1277653},
+    "ho chi minh city": {"latitude": 10.823099, "longitude": 106.629662}
+}
