@@ -29,4 +29,4 @@ def convert_to_white_icon(input_path, output_path):
     img.save(output_path, 'PNG')
 
 # Sử dụng hàm
-convert_to_white_icon('icon_weather/windy.png', 'icon_weather/windy_white.png')
+convert_to_white_icon('icon_weather/moonrise.png', 'icon_weather/moonrise_white.png')

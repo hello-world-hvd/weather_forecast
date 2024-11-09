@@ -6,6 +6,7 @@ from numpy import resize
 from timezonefinder import TimezoneFinder
 from datetime import*
 import pytz
+import customtkinter
 from PIL import Image, ImageTk
 from api_getdata import get_json_data, load_location
 
@@ -39,10 +40,8 @@ class WeatherApp:
         self.root.iconphoto(False, self.image_icon)
 
     def switch_to_detail_interface(self):
-        # Clear current interface
         for widget in self.root.winfo_children():
             widget.destroy()
-        # Import here to avoid circular import
         from Interface1 import WeatherDetail
         WeatherDetail(self.root, self.data, self.city, self.time_update_id, self.location)
 
@@ -203,16 +202,13 @@ class WeatherApp:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Round_box=PhotoImage(file="Images/Rounded Rectangle 1.png")
         img=(Image.open("Images/Rounded Rectangle 1.png"))
         Round_box_resize=img.resize((250, 115))
         self.Round_box=ImageTk.PhotoImage(Round_box_resize)
-        # Label(root,image=Round_box, bg="#57adff").place(x=30, y=110)
         Label(self.root,image=self.Round_box, bg="#57adff").place(x=50, y=130)
 
         #label
         self.label1=Label(self.root, text="Temperature", font=('Helvetica', 11), fg="white", bg="#203243")
-        # label1.place(x=50, y=120)
         self.label1.place(x=70, y=140)
 
         self.label2=Label(self.root, text="Humidity", font=('Helvetica', 11), fg="white", bg="#203243")
@@ -230,16 +226,13 @@ class WeatherApp:
         ##search box
         self.Search_image=PhotoImage(file="Images/Rounded Rectangle 3.png")
         self.myimage=Label(image=self.Search_image, bg="#57adff")
-        # myimage.place(x=320, y=120)
         self.myimage.place(x=370, y=150)
 
         self.weat_image=PhotoImage(file="Images/Layer 7.png")
         self.weatherimage=Label(self.root, image=self.weat_image, bg="#203243")
-        # weatherimage.place(x=340, y=127)
         self.weatherimage.place(x=390, y=157)
 
         self.textfield=tk.Entry(self.root, justify='center', width=15, font=('poppins', 25, 'bold'), bg="#203243", border=0, fg="white")
-        # textfield.place(x=420, y=130)
         self.textfield.place(x=470, y=160)
         if city is not None:
             self.textfield.insert(0, city)
@@ -247,33 +240,23 @@ class WeatherApp:
 
         self.Search_icon=PhotoImage(file="Images/Layer 6.png")
         self.myimage_icon=Button(image=self.Search_icon, borderwidth=0, cursor="hand2", bg="#203243", command=self.getData)
-        # myimage_icon.place(x=695, y=125)
         self.myimage_icon.place(x=745, y=155)
 
         ##Bottom box
-        # frame = Frame(self.root, width=900, height=180, bg="#212120")
-        # if city is None:
         frame = Frame(self.root, width=1010, height=202, bg="#212120")
         frame.pack(side=BOTTOM)
-
 
         ##bottom boxes
         #
         img=(Image.open("Images/Rounded Rectangle 2.png"))
         firstbox_resize=img.resize((265, 154))
         self.firstbox=ImageTk.PhotoImage(firstbox_resize)
-        #
-        # firstbox=PhotoImage(file="Images/Rounded Rectangle 2.png")
-        #
+        
         img=(Image.open("Images/Rounded Rectangle 2 copy.png"))
         secondbox_resize=img.resize((86, 136))
         self.secondbox=ImageTk.PhotoImage(secondbox_resize)
-        #
-        # secondbox=PhotoImage(file="Images/Rounded Rectangle 2 copy.png")
-
-        # Label(frame, image=firstbox, bg="#212120").place(x=30, y=20)
+        
         Label(frame, image=self.firstbox, bg="#212120").place(x=30, y=20)
-        # Label(frame, image=secondbox, bg="#212120").place(x=300, y=30)
         Label(frame, image=self.secondbox, bg="#212120").place(x=330, y=30)
         Label(frame, image=self.secondbox, bg="#212120").place(x=440, y=30)
         Label(frame, image=self.secondbox, bg="#212120").place(x=550, y=30)
@@ -285,7 +268,6 @@ class WeatherApp:
         self.clock=Label(self.root, font=("Helvetica", 35, 'bold'), fg="white", bg="#57adff")
         self.clock.place(x=50, y=40)
 
-
         #timezone
         self.timezone=Label(self.root, font=("Helvetica", 25), fg="white", bg="#57adff")
         self.timezone.place(x=700, y=40)
@@ -295,7 +277,6 @@ class WeatherApp:
 
         #thpwd
         self.t=Label(self.root, text="---", font=("Helvatica", 11), fg="white", bg="#203243")
-        # t.place(x=150, y=120)
         self.t.place(x=170, y=140)
 
         self.h=Label(self.root, text="---", font=("Helvatica", 11), fg="white", bg="#203243")
@@ -345,7 +326,6 @@ class WeatherApp:
         self.thirdframe=Frame(self.root, width=80, height=130, bg="#282829")
         self.thirdframe.place(x=445, y=360)
 
-
         self.day3=Label(self.thirdframe, bg="#282829", fg="#fff")
         self.day3.place(x=10, y=5)
 
@@ -358,7 +338,6 @@ class WeatherApp:
         #fourth cell
         self.fourthframe=Frame(self.root, width=80, height=130, bg="#282829")
         self.fourthframe.place(x=555, y=360)
-
 
         self.day4=Label(self.fourthframe, bg="#282829", fg="#fff")
         self.day4.place(x=10, y=5)
@@ -373,7 +352,6 @@ class WeatherApp:
         self.fifthframe=Frame(self.root, width=80, height=130, bg="#282829")
         self.fifthframe.place(x=665, y=360)
 
-
         self.day5=Label(self.fifthframe, bg="#282829", fg="#fff")
         self.day5.place(x=10, y=5)
 
@@ -386,7 +364,6 @@ class WeatherApp:
         #sixth cell
         self.sixthframe=Frame(self.root, width=80, height=130, bg="#282829")
         self.sixthframe.place(x=775, y=360)
-
 
         self.day6=Label(self.sixthframe, bg="#282829", fg="#fff")
         self.day6.place(x=10, y=5)

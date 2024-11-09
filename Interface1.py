@@ -24,7 +24,7 @@ class WeatherDetail:
         self.time_update_id = time_update_id
         
         # Configure root window
-        self.root.configure(bg="#F0F2F6")
+        # self.root.configure(bg="#F0F2F6")
         
         self.create_detail_interface()
         self.update_clock()
@@ -118,10 +118,11 @@ class WeatherDetail:
             return f"icon/{icon_code}n@2x.png"        
 
     def create_detail_interface(self):
-        # Top bar
+        ## Top bar
         top_frame = Frame(self.root, bg="#57adff", height=80)
         top_frame.pack(fill=X)
 
+        
         # Home button
         img = Image.open("Images/home.png")
         home_resize = img.resize((40, 40))
@@ -175,16 +176,40 @@ class WeatherDetail:
         city_label.pack(side=LEFT)
 
         ## Weather summary frame
-        summary_frame = Frame(location_temp_frame, bg="#282829", padx=10, pady=5, highlightbackground="white", highlightthickness=1)
+        summary_frame = Frame(location_temp_frame, bg="#282829", padx=10, pady=5, highlightbackground="white", highlightthickness=1, cursor="hand2")
         summary_frame.pack(side=LEFT, padx=10, fill=X, expand=True)
+
+        # Create container frames for both views
+        weather_view = Frame(summary_frame, bg="#282829")
+        time_view = Frame(summary_frame, bg="#282829")
+
+        # Variable to track current view
+        self.is_weather_view = True
+
+        def toggle_view(event):
+            if self.is_weather_view:
+                weather_view.pack_forget()
+                time_view.pack(fill=X)
+            else:
+                time_view.pack_forget()
+                weather_view.pack(fill=X)
+            self.is_weather_view = not self.is_weather_view
+
+        def bind_recursive(widget, event, callback):
+            widget.bind(event, callback)
+            for child in widget.winfo_children():
+                bind_recursive(child, event, callback)
+
+        # Bind click event to summary_frame and all its children
+        bind_recursive(summary_frame, '<Button-1>', toggle_view)
 
         # Current weather description
         weather_desc = self.data['current']['weather'][0]['description']
         weather_main = self.data['current']['weather'][0]['main']
         daily_summary = self.data['daily'][0]['summary']
 
-        desc_frame = Frame(summary_frame, bg="#282829")
-        # desc_frame.pack(fill=X)
+        # WEATHER VIEW
+        desc_frame = Frame(weather_view, bg="#282829")
         desc_frame.pack()
 
         summary_label = Label(
@@ -206,7 +231,7 @@ class WeatherDetail:
         description_label.pack(side=LEFT, padx=(10,0), pady=(4,0))
 
         # Daily Summary Frame
-        daily_summary_frame = Frame(summary_frame, bg="#282829")
+        daily_summary_frame = Frame(weather_view, bg="#282829")
         daily_summary_frame.pack(fill=X, pady=(5,0))
 
         daily_summary_label = Label(
@@ -218,12 +243,10 @@ class WeatherDetail:
             wraplength=400,  
             justify=LEFT
         )
-        # daily_summary_label.pack(side=LEFT)
         daily_summary_label.pack()
         
         # aqi frame
-        aqi_frame = Frame(summary_frame, bg="#282829")
-        # aqi_frame.pack(fill=X, pady=(5,0))
+        aqi_frame = Frame(weather_view, bg="#282829")
         aqi_frame.pack()
         
         aqi_value, aqi_status = get_aqi(self.location)
@@ -254,8 +277,79 @@ class WeatherDetail:
             bg="#282829"
         )
         aqi_status.pack(side=LEFT)
+        
+        # TIME VIEW
+        def format_time(timestamp):
+            return datetime.fromtimestamp(timestamp).strftime('%H:%M')
 
-        # Temperature display
+        # Sun and Moon times
+        sun_moon_frame = Frame(time_view, bg="#282829")
+        sun_moon_frame.pack(fill=X, pady=5)
+
+        # Sun Frame
+        sun_frame = Frame(sun_moon_frame, bg="#282829")
+        sun_frame.pack(side=LEFT, expand=True, fill=X)
+
+        # Sun icon
+        sun_icon = "☀️"  # You can replace this with an actual icon image
+        sun_label = Label(sun_frame, text=sun_icon, font=("Helvetica", 16), bg="#282829", fg="yellow")
+        sun_label.pack()
+
+        sunrise_time = format_time(self.data['daily'][0]['sunrise'])
+        sunset_time = format_time(self.data['daily'][0]['sunset'])
+
+        sunrise_label = Label(
+            sun_frame,
+            text=f"Sunrise: {sunrise_time}",
+            font=("Helvetica", 12),
+            bg="#282829",
+            fg="white"
+        )
+        sunrise_label.pack()
+
+        sunset_label = Label(
+            sun_frame,
+            text=f"Sunset: {sunset_time}",
+            font=("Helvetica", 12),
+            bg="#282829",
+            fg="white"
+        )
+        sunset_label.pack()
+
+        # Moon Frame
+        moon_frame = Frame(sun_moon_frame, bg="#282829")
+        moon_frame.pack(side=LEFT, expand=True, fill=X)
+
+        # Moon icon
+        moon_icon = "🌙"  # You can replace this with an actual icon image
+        moon_label = Label(moon_frame, text=moon_icon, font=("Helvetica", 16), bg="#282829")
+        moon_label.pack()
+
+        moonrise_time = format_time(self.data['daily'][0]['moonrise'])
+        moonset_time = format_time(self.data['daily'][0]['moonset'])
+
+        moonrise_label = Label(
+            moon_frame,
+            text=f"Moonrise: {moonrise_time}",
+            font=("Helvetica", 12),
+            bg="#282829",
+            fg="white"
+        )
+        moonrise_label.pack()
+
+        moonset_label = Label(
+            moon_frame,
+            text=f"Moonset: {moonset_time}",
+            font=("Helvetica", 12),
+            bg="#282829",
+            fg="white"
+        )
+        moonset_label.pack()
+
+        # Initially show weather view
+        weather_view.pack(fill=X)
+
+        ## Temperature display
         temp_frame = Frame(location_temp_frame, bg="#282829", padx=20, highlightbackground="white", highlightthickness=1, pady=10)
         temp_frame.pack(side=RIGHT, padx=(10, 30), pady=15)
 

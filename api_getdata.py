@@ -1,8 +1,13 @@
 import requests
+import geocoder
 from requests.structures import CaseInsensitiveDict
 
 api_key_location= "f5ffe47cbd3740f0b85f5721a16886aa"
 api_key_data = "a40a08819e2ca4455e9badc3a50026b6"
+
+def get_current_location():
+    cur_loc = geocoder.ip('me')
+    return cur_loc
 
 def load_location(address):
     url = f"https://api.geoapify.com/v1/geocode/search?text={address}&apiKey={api_key_location}"
@@ -31,6 +36,20 @@ def load_location(address):
             return "Không tìm thấy tọa độ cho địa chỉ này."
     else:
         return f"Lỗi khi gửi yêu cầu: {response.status_code}"
+
+def reverse_location(latitude, longitude):
+    url = f"https://api.geoapify.com/v1/geocode/reverse?lat={latitude}&lon={longitude}&apiKey={api_key_location}"
+    
+    response = requests.get(url)
+    data = response.json()
+    
+    if 'features' in data and len(data['features']) > 0:
+        properties = data['features'][0]['properties']
+        city = properties.get('city', 'Không rõ')
+        country = properties.get('country', 'Không rõ')
+        return city, country
+    else:
+        return "Không tìm thấy địa chỉ", "Không tìm thấy quốc gia"
 
 def get_json_data(location):
     api = f"https://api.openweathermap.org/data/2.8/onecall?lat={location.latitude}&lon={location.longitude}&units=metric&exclude=hourly&appid={api_key_data}"
