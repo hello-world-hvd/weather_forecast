@@ -56,6 +56,11 @@ def get_json_data(location):
     json_data=requests.get(api).json()
     return json_data
 
+def get_json_data2(location):
+    api = "https://api.openweathermap.org/data/2.8/onecall?lat="+str(location.latitude)+"&lon="+str(location.longitude)+"&units=metric&appid=a40a08819e2ca4455e9badc3a50026b6"
+    json_data=requests.get(api).json()
+    return json_data
+
 def get_aqi_color(aqi):
     if aqi <= 50: return "#00e400"      # Good
     elif aqi <= 100: return "#ffff00"    # Moderate
