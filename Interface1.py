@@ -1,5 +1,6 @@
 import json
 import os
+from pkgutil import get_data
 from tkinter import*
 import tkinter as tk
 from turtle import update
@@ -13,7 +14,8 @@ import pytz
 from PIL import Image, ImageTk
 from app import get_current_time
 import customtkinter
-from api_getdata import get_aqi
+from api_getdata import get_aqi, get_json_data2
+from datetime import datetime, timedelta
 
 class WeatherDetail:
     def __init__(self, root, data, city, time_update_id, location):
@@ -36,6 +38,112 @@ class WeatherDetail:
         from weather import WeatherApp
         Main = WeatherApp(self.root, self.data, self.time_update_id, self.city, self.location)
         Main.create_main_interface(self.city, self.data, self.location)
+        
+    def show_new_weather_details(self):
+        """Display hourly weather details when user clicks for more information."""
+        for widget in self.root.winfo_children():
+            widget.pack_forget()
+
+        new_frame = Frame(self.root, bg="#57adff")
+        new_frame.pack(fill="both", expand=True)
+
+        img = Image.open("Images/back vector.png")
+        back_resize = img.resize((40, 40))
+        back = ImageTk.PhotoImage(back_resize)
+        back_button = Button(
+            new_frame, image=back, borderwidth=0, cursor="hand2", bg="#57adff",
+            activebackground="#57adff", command=self.switch_to_weather_interface
+        )
+        back_button.image = back
+        back_button.place(x=20, y=20)
+
+        title_label = Label(new_frame, text="Dự báo theo giờ", font=("Helvetica", 24, "bold"), bg="#57adff", fg="white")
+        title_label.pack(pady=20)
+
+        hourly_frame = Frame(new_frame, bg="#57adff")
+        hourly_frame.pack(pady=20)
+
+        # Get current time in local timezone (example: Vietnam - UTC+7)
+        #local_tz = pytz.timezone("Asia/Ho_Chi_Minh")
+        #current_time = datetime.now(local_tz).replace(minute=0, second=0, microsecond=0)
+
+
+        obj=TimezoneFinder()
+
+        result=obj.timezone_at(lng=self.location.longitude, lat=self.location.latitude)
+
+        #self.timezone.config(text=result)
+        #self.long_lat.config(text=f"{round(self.location.latitude, 4)}°N,{round(self.location.longitude, 4)}°E")
+
+        home=pytz.timezone(result)
+        current_time = datetime.now(home).replace(minute=0, second=0, microsecond=0)
+
+        # Loop to create weather widgets
+        hour_counter = 0  # Bắt đầu từ ô đầu tiên của lưới
+        columns = 6  # 6 cột trên mỗi hàng
+
+        for i in range(len(self.getdata['hourly'])):  # Duyệt qua tất cả dữ liệu giờ
+            hour_info = self.getdata['hourly'][i]
+            temp_celsius = round(hour_info['temp'])
+            weather_desc = hour_info['weather'][0]['description'].capitalize()
+            icon_code = hour_info['weather'][0]['icon']
+
+            timestamp = hour_info['dt']
+            hour_time = datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc)
+            local_time = hour_time.astimezone(home)
+
+            # Bắt đầu từ giờ kế tiếp
+            if local_time > current_time:
+                formatted_time = local_time.strftime("%I %p")
+
+                # Sắp xếp trong 2 hàng, 6 cột
+                row = hour_counter // columns  # Chia thành 2 hàng
+                col = hour_counter % columns   # Mỗi hàng có 6 cột
+
+                # Weather Frame
+                single_hour_frame = Frame(hourly_frame, bg="#57adff")
+                single_hour_frame.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+
+                # Icon
+                icon_url = f"https://openweathermap.org/img/wn/{icon_code}@2x.png"
+                response = requests.get(icon_url, stream=True)
+                if response.status_code == 200:
+                    icon_img = Image.open(response.raw).resize((40, 40))  # Resize icon
+                    weather_icon = ImageTk.PhotoImage(icon_img)
+                else:
+                    weather_icon = None
+
+                if weather_icon:
+                    icon_label = Label(single_hour_frame, image=weather_icon, bg="#57adff")
+                    icon_label.image = weather_icon
+                    icon_label.pack(pady=(5, 0))  # Biểu tượng ở trên cùng
+                else:
+                    icon_label = Label(single_hour_frame, text="❓", font=("Helvetica", 16), bg="#57adff", fg="white")
+                    icon_label.pack(pady=(5, 0))  # Trường hợp không có icon
+
+                # Text Details
+                hour_label = Label(
+                    single_hour_frame,
+                    text=f"{formatted_time}\n{temp_celsius}°C\n{weather_desc}\nHumidity: {hour_info['humidity']}%\nWind: {hour_info['wind_speed']} m/s",
+                    font=("Helvetica", 11), bg="#57adff", fg="white", justify="center"
+                )
+                hour_label.pack(pady=(5, 0))  # Nội dung text ở dưới
+
+                hour_counter += 1  # Di chuyển đến ô tiếp theo
+
+                # Dừng sau khi đã hiển thị 12 mục
+                if hour_counter == 12:
+                    break
+
+    def switch_to_weather_interface(self):
+        # Xóa toàn bộ giao diện hiện tại
+        for widget in self.root.winfo_children():
+            widget.pack_forget()
+
+        # Quay lại giao diện 2 (giao diện thời tiết chi tiết)
+        self.create_detail_interface()  # Gọi lại phương thức tạo giao diện thời tiết chi tiết
+        self.getData() 
+    
 
     def update_clock(self):
         self.current_time = get_current_time(self.location)
@@ -355,6 +463,10 @@ class WeatherDetail:
 
         temp_icon_frame = Frame(temp_frame, bg="#282829")
         temp_icon_frame.pack()
+
+        # Cập nhật sự kiện cho temp_frame
+        # Thay thế trực tiếp trong sự kiện bind
+        temp_frame.bind("<Button-1>", lambda e: self.show_new_weather_details())
 
 
         img = (Image.open(self.icon_current_weather(get_current_time(self.location))) )
