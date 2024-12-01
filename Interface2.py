@@ -53,20 +53,35 @@ class Favorite:
         self.clock_label.after(1000, self.update_clock)
     
     def create_saved_interface(self):
+        # canvas = Canvas(width=1000, height=1000, bg="#57adff")
+        # canvas.pack(fill="both", expand=True)
+
+        #background
+        # bgr = Image.open("Images/cloud.png")
+        # bgr_resize = bgr.resize((1000, 510))
+        # deco0 = ImageTk.PhotoImage(bgr_resize)
+        # # canvas.create_image(0, 0, image=deco0)
+        # Label0 = Label(
+        #     # top_frame,
+        #     image=deco0,
+        #     borderwidth=0,
+        #     bg="#57adff"
+        # )
+        # Label0.image=deco0
+        # Label0.place(x=0, y=0)
+
         # Top bar
         top_frame = Frame(self.root, bg="#57adff", height=80)
         top_frame.pack(fill=X)
 
-        # Clock
-        self.clock_label = Label(font=("Helvetica", 40, 'bold'), bg="#57adff", fg="white")
-        self.clock_label.place(x = 250, y = 20)
+        
 
         # Home button
         img = Image.open("Images/home.png")
         home_resize = img.resize((70, 70))
         home = ImageTk.PhotoImage(home_resize)
         home_button = Button(
-            top_frame,
+            # top_frame,
             image=home,
             borderwidth=0,
             cursor="hand2",
@@ -80,31 +95,46 @@ class Favorite:
         # Main content frame
         # main_frame = Frame(self.root, bg="#212120")
         # main_frame.pack(fill=BOTH, expand=True, padx=0)
+        # image3
+        img3 = Image.open("Images/wave1.png")
+        img3_resize = img3.resize((750, 532))
+        deco3 = ImageTk.PhotoImage(img3_resize)
+        Label3 = Label(
+            # top_frame,
+            image=deco3,
+            borderwidth=0,
+            bg="#57adff"
+        )
+        Label3.image=deco3
+        Label3.place(x=0, y=150)
 
         #image1
         img1 = Image.open("Images/sun1.png")
         img1_resize = img1.resize((300, 500))
         deco1 = ImageTk.PhotoImage(img1_resize)
+        # canvas.create_image(722, 100, image=deco1)
         Label1 = Label(
             # top_frame,
             image=deco1,
             borderwidth=0,
-            bg="#57adff",
-            activebackground="#57adff"
+            bg="#57adff"
         )
         Label1.image=deco1
         Label1.place(x=722, y=100)
 
         #image2
         img2 = Image.open("Images/sun2.png")
-        img2_resize = img2.resize((250, 250))
+        img2_resize = img2.resize((350, 350))
         deco2 = ImageTk.PhotoImage(img2_resize)
         Label2 = Label(
             # top_frame,
             image=deco2,
             borderwidth=0,
-            bg="#57adff",
-            activebackground="#57adff"
+            bg="#57adff"
         )
         Label2.image=deco2
         Label2.place(x=0, y=0)
+
+        # Clock
+        self.clock_label = Label(font=("Helvetica", 40, 'bold'), bg="#57adff", fg="white")
+        self.clock_label.place(x = 250, y = 20)
