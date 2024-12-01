@@ -39,6 +39,12 @@ class WeatherApp:
         self.image_icon=PhotoImage(file="Images/logo.png")
         self.root.iconphoto(False, self.image_icon)
 
+    def switch_to_saved_location(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        from Interface2 import Favorite
+        Favorite(self.root, self.data, self.city, self.time_update_id, self.location)
+
     def switch_to_detail_interface(self):
         for widget in self.root.winfo_children():
             widget.destroy()
