@@ -8,16 +8,16 @@ from datetime import*
 import pytz
 import customtkinter
 from PIL import Image, ImageTk
-from api_getdata import get_json_data, load_location
+from api_getdata import get_json_data, load_location, get_current_location, reverse_location
 
 class WeatherApp:
     def __init__(self, root=None, data=None, time_update_id=None, city=None, location = None):
         if root is None:
             self.root = Tk()
-            self.city = None
-            self.data = None
-            self.location = None
             self.time_update_id = None
+            self.location = get_current_location()
+            self.city = reverse_location(self.location)
+            self.data = get_json_data(self.location)
         else:
             self.root = root
             self.city = city
@@ -26,8 +26,7 @@ class WeatherApp:
             self.time_update_id = time_update_id
         self.setup_main_window()
         self.create_main_interface()
-        self.city = None
-        self.location = None
+        # self.city = reverse_location(self.location.lat, self.location.lng)
         
     def setup_main_window(self):
         self.root.title("Weather App")
@@ -38,6 +37,12 @@ class WeatherApp:
         ##icon
         self.image_icon=PhotoImage(file="Images/logo.png")
         self.root.iconphoto(False, self.image_icon)
+        
+    def switch_to_saved_location(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        from menu import Favorite
+        Favorite(self.root, self.data, self.city, self.time_update_id, self.location)
 
     def switch_to_detail_interface(self):
         for widget in self.root.winfo_children():
@@ -190,12 +195,15 @@ class WeatherApp:
 
         seventh=first+timedelta(6)
         self.day7.config(text=seventh.strftime("%d/%m/%Y \n%A"))
+        
+        # location box
+        self.loc_label.config(text = self.city)
 
     def getData(self):
         self.city = self.textfield.get()
-        self.location = load_location(self.city)
-        self.data=get_json_data(self.location)
-        self.getTime(self.location)
+        self.location = load_location(self.city) # latitude longitude
+        self.city = reverse_location(self.location)
+        self.data=get_json_data(self.location) # thông tin thời tiết của vị trí hiện tại
         self.getWeather(self.data)
 
     def create_main_interface(self, city=None, json_data=None, location=None):
@@ -214,7 +222,7 @@ class WeatherApp:
         self.label2=Label(self.root, text="Humidity", font=('Helvetica', 11), fg="white", bg="#203243")
         self.label2.place(x=70, y=160)
 
-        self.label3=Label(self.root, text="Presure", font=('Helvetica', 11), fg="white", bg="#203243")
+        self.label3=Label(self.root, text="Pressure", font=('Helvetica', 11), fg="white", bg="#203243")
         self.label3.place(x=70, y=180)
 
         self.label4=Label(self.root, text="Wind Speed", font=('Helvetica', 11), fg="white", bg="#203243")
@@ -263,6 +271,26 @@ class WeatherApp:
         Label(frame, image=self.secondbox, bg="#212120").place(x=660, y=30)
         Label(frame, image=self.secondbox, bg="#212120").place(x=770, y=30)
         Label(frame, image=self.secondbox, bg="#212120").place(x=880, y=30)
+        
+        # box location
+        # self.location_box = customtkinter.CTkFrame(
+        #     frame, width=400, height=50,
+        #     corner_radius=10, 
+        #     border_width=1, border_color="white",
+        #     fg_color="#282829"
+        # )
+        # self.location_box.pack_propagate(False)
+        self.location_box = Frame(self.root, width=400, height=50, bg="#282829", highlightbackground="white", highlightthickness=1)
+        self.location_box.pack(side=BOTTOM)
+        img = Image.open("Images/location_white.png")
+        loc_resize = img.resize((24, 24))
+        self.locImage = ImageTk.PhotoImage(loc_resize)
+        self.loc_img_label = Label(self.location_box, image=self.locImage, bg="#282829")
+        self.loc_img_label.pack(side=LEFT, padx=10)
+        
+        self.loc_label = Label(self.location_box, font=("Helvetica", 20, 'bold'), fg="white", bg="#282829")
+        self.loc_label.pack(side=LEFT, padx=10)
+        self.loc_label.config(text = self.city)
 
         #clock (here we will place time)
         self.clock=Label(self.root, font=("Helvetica", 35, 'bold'), fg="white", bg="#57adff")
@@ -387,10 +415,8 @@ class WeatherApp:
         self.day7temp=Label(self.seventhframe, bg="#282829", fg="#fff")
         self.day7temp.place(x=2, y=90)
 
-        if city is not None:
-            self.getWeather(json_data)
-            self.getTime(location)
-            print(city)
+        self.getTime(self.location)
+        self.getWeather(self.data)
 
 
     def run(self):

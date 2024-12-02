@@ -122,7 +122,6 @@ class WeatherDetail:
         top_frame = Frame(self.root, bg="#57adff", height=80)
         top_frame.pack(fill=X)
 
-        
         # Home button
         img = Image.open("Images/home.png")
         home_resize = img.resize((40, 40))
@@ -169,9 +168,10 @@ class WeatherDetail:
         city_label = Label(
             loc_frame,
             text=self.city.upper(),
-            font=("Helvetica", 24, "bold"),
+            font=("Helvetica", 16, "bold"),
             fg="white",
-            bg="#282829"
+            bg="#282829",
+            wraplength=150
         )
         city_label.pack(side=LEFT)
 
@@ -240,7 +240,7 @@ class WeatherDetail:
             font=("Helvetica", 11),
             fg="#e0e0e0",
             bg="#282829",
-            wraplength=400,  
+            wraplength=300,  
             justify=LEFT
         )
         daily_summary_label.pack()
@@ -355,7 +355,6 @@ class WeatherDetail:
 
         temp_icon_frame = Frame(temp_frame, bg="#282829")
         temp_icon_frame.pack()
-
 
         img = (Image.open(self.icon_current_weather(get_current_time(self.location))) )
         self.weather_icon = ImageTk.PhotoImage(img.resize((70, 70)))
