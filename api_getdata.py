@@ -61,6 +61,7 @@ def get_json_data2(location):
     json_data=requests.get(api).json()
     return json_data
 
+
 def get_aqi_color(aqi):
     if aqi <= 50: return "#00e400"      # Good
     elif aqi <= 100: return "#ffff00"    # Moderate
@@ -93,4 +94,7 @@ def get_aqi(location):
     except Exception as e:
         print(f"Error fetching AQI data: {e}")
         return aqi
+    
+
+
 
