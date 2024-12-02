@@ -214,10 +214,11 @@ class WeatherApp:
         Round_box_resize=img.resize((250, 115))
         self.Round_box=ImageTk.PhotoImage(Round_box_resize)
         Label(self.root,image=self.Round_box, bg="#57adff").place(x=50, y=130)
-
+        
         #Menu Button
         top_frame = Frame(self.root, bg="#57adff", height=80)
         top_frame.pack(fill=X)
+
         menu = Image.open("Images/menu_white.png")
         menu_resize = menu.resize((40, 40))
         menu = ImageTk.PhotoImage(menu_resize)
@@ -232,7 +233,6 @@ class WeatherApp:
         )
         menu_button.image = menu
         menu_button.place(x=10, y=10)
-
 
         #label
         self.label1=Label(self.root, text="Temperature", font=('Helvetica', 11), fg="white", bg="#203243")

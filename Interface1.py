@@ -40,7 +40,7 @@ class WeatherDetail:
         from weather import WeatherApp
         Main = WeatherApp(self.root, self.data, self.time_update_id, self.city, self.location)
         Main.create_main_interface(self.city, self.data, self.location)
-        
+
     def show_new_weather_details(self):
         """Display hourly weather details when user clicks for more information."""
         for widget in self.root.winfo_children():
@@ -146,8 +146,9 @@ class WeatherDetail:
 
         # Quay lại giao diện 2 (giao diện thời tiết chi tiết)
         self.create_detail_interface()  # Gọi lại phương thức tạo giao diện thời tiết chi tiết
-        self.getData() 
-    
+        self.getData()
+
+
 
     def update_clock(self):
         self.current_time = get_current_time(self.location)
@@ -472,6 +473,8 @@ class WeatherDetail:
         # Cập nhật sự kiện cho temp_frame
         # Thay thế trực tiếp trong sự kiện bind
         temp_frame.bind("<Button-1>", lambda e: self.show_new_weather_details())
+
+
 
 
         img = (Image.open(self.icon_current_weather(get_current_time(self.location))) )
