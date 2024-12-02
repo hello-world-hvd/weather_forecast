@@ -36,7 +36,23 @@ class Favorite:
         
         # Tạo các nút cho từng vị trí
         for idx, location in enumerate(self.locations):
-            btn = tk.Button(self.root, text=location["name"], command=lambda loc = location: self.switch_to_main_interface(loc))
+            icon_image = Image.open("Images/location.png").resize((20, 20))  # Kích thước icon
+            icon = ImageTk.PhotoImage(icon_image)
+
+            btn = tk.Button(
+                self.root,
+                text=location["name"],
+                image=icon,
+                compound="left",  # Đặt icon bên trái văn bản
+                font=("Helvetica", 14, "bold"),
+                bg="#3498db",
+                fg="white",
+                activebackground="#3498db",
+                activeforeground="white",
+                relief="flat",
+                command=lambda loc=location: self.switch_to_main_interface(loc)
+            )
+            btn.image = icon
             btn.pack(pady=10)
     
     def switch_to_main_interface(self, location):
