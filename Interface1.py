@@ -31,6 +31,7 @@ class WeatherDetail:
         self.create_detail_interface()
         self.update_clock()
         self.getData()
+        self.getdata = get_json_data2(self.location)
 
     def switch_to_main_interface(self):
         for widget in self.root.winfo_children():
@@ -38,7 +39,7 @@ class WeatherDetail:
         from weather import WeatherApp
         Main = WeatherApp(self.root, self.data, self.time_update_id, self.city, self.location)
         Main.create_main_interface(self.city, self.data, self.location)
-        
+
     def show_new_weather_details(self):
         """Display hourly weather details when user clicks for more information."""
         for widget in self.root.winfo_children():
@@ -63,26 +64,26 @@ class WeatherDetail:
         hourly_frame = Frame(new_frame, bg="#57adff")
         hourly_frame.pack(pady=20)
 
-        # Get current time in local timezone (example: Vietnam - UTC+7)
-        #local_tz = pytz.timezone("Asia/Ho_Chi_Minh")
-        #current_time = datetime.now(local_tz).replace(minute=0, second=0, microsecond=0)
+        # Get current time in local timezone
+        obj = TimezoneFinder()
+        result = obj.timezone_at(lng=self.location.longitude, lat=self.location.latitude)
 
-
-        obj=TimezoneFinder()
-
-        result=obj.timezone_at(lng=self.location.longitude, lat=self.location.latitude)
-
-        #self.timezone.config(text=result)
-        #self.long_lat.config(text=f"{round(self.location.latitude, 4)}°N,{round(self.location.longitude, 4)}°E")
-
-        home=pytz.timezone(result)
+        home = pytz.timezone(result)
         current_time = datetime.now(home).replace(minute=0, second=0, microsecond=0)
 
-        # Loop to create weather widgets
-        hour_counter = 0  # Bắt đầu từ ô đầu tiên của lưới
-        columns = 6  # 6 cột trên mỗi hàng
+        # Configure grid to make sure columns and rows are responsive
+        columns = 6  # 6 columns per row
+        rows = 2  # Display in 2 rows
 
-        for i in range(len(self.getdata['hourly'])):  # Duyệt qua tất cả dữ liệu giờ
+        # Create grid system
+        for i in range(columns):
+            hourly_frame.grid_columnconfigure(i, weight=1, uniform="equal")  # Ensure equal column widths
+        for i in range(rows):
+            hourly_frame.grid_rowconfigure(i, weight=1, uniform="equal")  # Ensure equal row heights
+
+        hour_counter = 0  # Start from the first cell
+
+        for i in range(len(self.getdata['hourly'])):
             hour_info = self.getdata['hourly'][i]
             temp_celsius = round(hour_info['temp'])
             weather_desc = hour_info['weather'][0]['description'].capitalize()
@@ -92,46 +93,48 @@ class WeatherDetail:
             hour_time = datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc)
             local_time = hour_time.astimezone(home)
 
-            # Bắt đầu từ giờ kế tiếp
             if local_time > current_time:
                 formatted_time = local_time.strftime("%I %p")
 
-                # Sắp xếp trong 2 hàng, 6 cột
-                row = hour_counter // columns  # Chia thành 2 hàng
-                col = hour_counter % columns   # Mỗi hàng có 6 cột
+                # Calculate row and column
+                row = hour_counter // columns
+                col = hour_counter % columns
 
-                # Weather Frame
-                single_hour_frame = Frame(hourly_frame, bg="#57adff")
-                single_hour_frame.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+                # Create a frame for the weather information
+                single_hour_frame = Frame(hourly_frame, bg="#57adff", bd=2, relief="solid")  # Add border to frame
+                single_hour_frame.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
 
                 # Icon
                 icon_url = f"https://openweathermap.org/img/wn/{icon_code}@2x.png"
-                response = requests.get(icon_url, stream=True)
-                if response.status_code == 200:
-                    icon_img = Image.open(response.raw).resize((40, 40))  # Resize icon
-                    weather_icon = ImageTk.PhotoImage(icon_img)
-                else:
+                try:
+                    response = requests.get(icon_url, stream=True)
+                    if response.status_code == 200:
+                        icon_img = Image.open(response.raw).resize((50, 50))  # Resize icon
+                        weather_icon = ImageTk.PhotoImage(icon_img)
+                    else:
+                        weather_icon = None
+                except requests.exceptions.RequestException:
                     weather_icon = None
 
                 if weather_icon:
                     icon_label = Label(single_hour_frame, image=weather_icon, bg="#57adff")
                     icon_label.image = weather_icon
-                    icon_label.pack(pady=(5, 0))  # Biểu tượng ở trên cùng
+                    icon_label.pack(pady=(5, 0))  # Icon at top
                 else:
                     icon_label = Label(single_hour_frame, text="❓", font=("Helvetica", 16), bg="#57adff", fg="white")
-                    icon_label.pack(pady=(5, 0))  # Trường hợp không có icon
+                    icon_label.pack(pady=(5, 0))  # If no icon
 
-                # Text Details
+                # Text details
                 hour_label = Label(
                     single_hour_frame,
                     text=f"{formatted_time}\n{temp_celsius}°C\n{weather_desc}\nHumidity: {hour_info['humidity']}%\nWind: {hour_info['wind_speed']} m/s",
                     font=("Helvetica", 11), bg="#57adff", fg="white", justify="center"
                 )
-                hour_label.pack(pady=(5, 0))  # Nội dung text ở dưới
+                hour_label.pack(pady=(5, 0))  # Text at the bottom
 
-                hour_counter += 1  # Di chuyển đến ô tiếp theo
+                hour_counter += 1  # Move to next cell
 
-                # Dừng sau khi đã hiển thị 12 mục
+                # Stop after displaying 12 items
                 if hour_counter == 12:
                     break
 
@@ -142,8 +145,9 @@ class WeatherDetail:
 
         # Quay lại giao diện 2 (giao diện thời tiết chi tiết)
         self.create_detail_interface()  # Gọi lại phương thức tạo giao diện thời tiết chi tiết
-        self.getData() 
-    
+        self.getData()
+
+
 
     def update_clock(self):
         self.current_time = get_current_time(self.location)
@@ -467,6 +471,8 @@ class WeatherDetail:
         # Cập nhật sự kiện cho temp_frame
         # Thay thế trực tiếp trong sự kiện bind
         temp_frame.bind("<Button-1>", lambda e: self.show_new_weather_details())
+
+
 
 
         img = (Image.open(self.icon_current_weather(get_current_time(self.location))) )
