@@ -1,3 +1,4 @@
+import json
 from tkinter import*
 import tkinter as tk
 from geopy.geocoders import Nominatim
@@ -9,6 +10,7 @@ import pytz
 import customtkinter
 from PIL import Image, ImageTk
 from api_getdata import get_json_data, load_location, get_current_location, reverse_location
+from app import *
 
 class WeatherApp:
     def __init__(self, root=None, data=None, time_update_id=None, city=None, location = None):
@@ -16,7 +18,8 @@ class WeatherApp:
             self.root = Tk()
             self.time_update_id = None
             self.location = get_current_location()
-            self.city = reverse_location(self.location)
+            tmp = reverse_location(self.location)
+            self.city = tmp[0]+", "+tmp[1]
             self.data = get_json_data(self.location)
         else:
             self.root = root
@@ -42,7 +45,7 @@ class WeatherApp:
         for widget in self.root.winfo_children():
             widget.destroy()
         from menu import Favorite
-        Favorite(self.root, self.data, self.city, self.time_update_id, self.location)
+        Favorite(self.root, self.data, self.time_update_id, self.city, self.location)
 
     def switch_to_detail_interface(self):
         for widget in self.root.winfo_children():
@@ -198,13 +201,37 @@ class WeatherApp:
         
         # location box
         self.loc_label.config(text = self.city)
+        locations = load_location_list()
+            
+        if not is_location_in_list(self.location, locations):
+            self.heart_label.config(image=self.heart_white)
+        else:
+            self.heart_label.config(image=self.heart_red)
 
     def getData(self):
         self.city = self.textfield.get()
         self.location = load_location(self.city) # latitude longitude
-        self.city = reverse_location(self.location)
+        tmp = reverse_location(self.location)
+        if tmp[0]=="Không rõ":
+            self.city = self.city+", "+tmp[1]
+        else:
+            self.city = tmp[0]+", "+tmp[1]
         self.data=get_json_data(self.location) # thông tin thời tiết của vị trí hiện tại
         self.getWeather(self.data)
+        self.getTime(self.location)
+        
+    def change_image(self, label):
+        locations = load_location_list()
+        if not is_location_in_list(self.location, locations):
+            label.config(image=self.heart_red)
+            save_location(self.city, self.location)
+            k=True
+        else:
+            label.config(image=self.heart_white)
+            remove_location(self.location, locations)
+            save_location_list(locations)
+            k=False
+              
 
     def create_main_interface(self, city=None, json_data=None, location=None):
         for widget in self.root.winfo_children():
@@ -232,7 +259,6 @@ class WeatherApp:
         )
         menu_button.image = menu
         menu_button.place(x=10, y=10)
-
 
         #label
         self.label1=Label(self.root, text="Temperature", font=('Helvetica', 11), fg="white", bg="#203243")
@@ -292,13 +318,6 @@ class WeatherApp:
         Label(frame, image=self.secondbox, bg="#212120").place(x=880, y=30)
         
         # box location
-        # self.location_box = customtkinter.CTkFrame(
-        #     frame, width=400, height=50,
-        #     corner_radius=10, 
-        #     border_width=1, border_color="white",
-        #     fg_color="#282829"
-        # )
-        # self.location_box.pack_propagate(False)
         self.location_box = Frame(self.root, width=400, height=50, bg="#282829", highlightbackground="white", highlightthickness=1)
         self.location_box.pack(side=BOTTOM)
         img = Image.open("Images/location_white.png")
@@ -310,6 +329,23 @@ class WeatherApp:
         self.loc_label = Label(self.location_box, font=("Helvetica", 20, 'bold'), fg="white", bg="#282829")
         self.loc_label.pack(side=LEFT, padx=10)
         self.loc_label.config(text = self.city)
+        
+        img = Image.open("Images/heart.png")
+        heart_white_resize = img.resize((24, 24))
+        self.heart_white = ImageTk.PhotoImage(heart_white_resize)
+        img = Image.open("Images/heart_red.png")
+        heart_red_resize = img.resize((24, 24))
+        self.heart_red = ImageTk.PhotoImage(heart_red_resize)
+        
+        locations = load_location_list()
+        k = is_location_in_list(self.location, locations)
+            
+        if not k:
+            self.heart_label = Label(self.location_box, image=self.heart_white, bg="#282829")
+        else:
+            self.heart_label = Label(self.location_box, image=self.heart_red, bg="#282829")
+        self.heart_label.pack(side=LEFT, padx=10)
+        self.heart_label.bind("<Button-1>", lambda event: self.change_image( self.heart_label)) 
 
         #clock (here we will place time)
         self.clock=Label(self.root, font=("Helvetica", 35, 'bold'), fg="white", bg="#57adff")

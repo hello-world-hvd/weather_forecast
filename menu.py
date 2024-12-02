@@ -14,21 +14,19 @@ import pytz
 from PIL import Image, ImageTk
 from app import get_current_time
 import customtkinter
-from api_getdata import get_aqi
+from api_getdata import get_json_data
 from datetime import datetime
 
 class Favorite:
-    def __init__(self, root, data, city, time_update_id, location):
+    def __init__(self, root, data, time_update_id, city, location):
         self.root = root
         self.root.title("Location Information")
         self.data = data
         self.city = city
         self.location = location
         self.time_update_id = time_update_id
-        # self.root.geometry("400x300")
         self.create_saved_interface()
         self.update_clock()
-        # self.getData()
         
         # Đọc file JSON
         with open("location_data.json", "r") as f:
@@ -36,16 +34,43 @@ class Favorite:
         
         # Tạo các nút cho từng vị trí
         for idx, location in enumerate(self.locations):
-            btn = tk.Button(self.root, text=location["name"], command=lambda loc = location: self.switch_to_main_interface(loc))
+            icon_image = Image.open("Images/location_white.png").resize((20, 20))  # Kích thước icon
+            icon = ImageTk.PhotoImage(icon_image)
+
+            btn = tk.Button(
+                self.root,
+                text=location["name"],
+                image=icon,
+                compound="left",  # Đặt icon bên trái văn bản
+                font=("Helvetica", 14, "bold"),
+                bg="#282829",
+                fg="white",
+                activebackground="#3498db",
+                activeforeground="white",
+                relief="solid", bd=1,
+                command=lambda loc=location: self.switch_to_main_interface(loc)
+            )
+            btn.image = icon  # Giữ tham chiếu để không bị thu gom bộ nhớ
             btn.pack(pady=10)
     
     def switch_to_main_interface(self, location):
         for widget in self.root.winfo_children():
             widget.destroy()
         from weather import WeatherApp
-        Main = WeatherApp(self.root, self.data, self.time_update_id, self.city, self.location)
-        Main.create_main_interface(location["name"], self.data, self.location)
+        loc=type('Location', (object,), {
+                'latitude': location['latitude'],
+                'longitude': location['longitude']
+            })
+        Main = WeatherApp(self.root, get_json_data(loc), self.time_update_id, location['name'], loc)
+        Main.create_main_interface(location["name"], self.data, loc)
 
+    def back_to_main_interface(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        from weather import WeatherApp
+        Main = WeatherApp(self.root, self.data, self.time_update_id, self.city, self.location)
+        Main.create_main_interface(self.city, self.data, self.location)
+    
     def update_clock(self):
         # Lấy ngày và giờ hiện tại
         self.current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -53,28 +78,10 @@ class Favorite:
         self.clock_label.after(1000, self.update_clock)
     
     def create_saved_interface(self):
-        # canvas = Canvas(width=1000, height=1000, bg="#57adff")
-        # canvas.pack(fill="both", expand=True)
-
-        #background
-        # bgr = Image.open("Images/cloud.png")
-        # bgr_resize = bgr.resize((1000, 510))
-        # deco0 = ImageTk.PhotoImage(bgr_resize)
-        # # canvas.create_image(0, 0, image=deco0)
-        # Label0 = Label(
-        #     # top_frame,
-        #     image=deco0,
-        #     borderwidth=0,
-        #     bg="#57adff"
-        # )
-        # Label0.image=deco0
-        # Label0.place(x=0, y=0)
 
         # Top bar
         top_frame = Frame(self.root, bg="#57adff", height=80)
         top_frame.pack(fill=X)
-
-        
 
         # Home button
         img = Image.open("Images/home.png")
@@ -87,15 +94,11 @@ class Favorite:
             cursor="hand2",
             bg="#57adff",
             activebackground="#57adff",
-            command=lambda: self.switch_to_main_interface({"name":""})
+            command=lambda: self.back_to_main_interface()
         )
         home_button.image = home
         home_button.place(x=900, y=20)
         
-        # Main content frame
-        # main_frame = Frame(self.root, bg="#212120")
-        # main_frame.pack(fill=BOTH, expand=True, padx=0)
-        # image3
         img3 = Image.open("Images/wave1.png")
         img3_resize = img3.resize((750, 532))
         deco3 = ImageTk.PhotoImage(img3_resize)

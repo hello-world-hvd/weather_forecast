@@ -52,7 +52,7 @@ def reverse_location(location):
         # district = properties.get('district', 'Không rõ')
         city = properties.get('city', 'Không rõ')
         country = properties.get('country', 'Không rõ')
-        return city + ", " + country
+        return city, country
     else:
         return "Không tìm thấy địa chỉ", "Không tìm thấy quốc gia"
 
@@ -65,6 +65,7 @@ def get_json_data2(location):
     api = "https://api.openweathermap.org/data/2.8/onecall?lat="+str(location.latitude)+"&lon="+str(location.longitude)+"&units=metric&appid=a40a08819e2ca4455e9badc3a50026b6"
     json_data=requests.get(api).json()
     return json_data
+
 
 def get_aqi_color(aqi):
     if aqi <= 50: return "#00e400"      # Good
@@ -98,4 +99,7 @@ def get_aqi(location):
     except Exception as e:
         print(f"Error fetching AQI data: {e}")
         return aqi
+    
+
+
 

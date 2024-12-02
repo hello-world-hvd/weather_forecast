@@ -1,6 +1,17 @@
 [
-    {"name": "Hanoi", "latitude": 21.0283334, "longitude": 105.854041},
-    {"name": "Delhi", "latitude": 28.6273928, "longitude": 77.1716954},
-    {"name": "London", "latitude": 51.5074456, "longitude": -0.1277653},
-    {"name": "Ho Chi Minh City","latitude": 10.823099, "longitude": 106.629662}
+    {
+        "name": "London, United Kingdom",
+        "latitude": 51.5074456,
+        "longitude": -0.1277653
+    },
+    {
+        "name": "New York, United States",
+        "latitude": 40.7127281,
+        "longitude": -74.0060152
+    },
+    {
+        "name": "Ngh\u1ec7 An, Vietnam",
+        "latitude": 19.1976001,
+        "longitude": 105.060676
+    }
 ]
